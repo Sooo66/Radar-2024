@@ -1,0 +1,10 @@
+{
+	"name": "Radar-2024",
+	"dockerFile": "Dockerfile",
+	"runArgs": [
+	  "--privileged"
+	//   "--host"
+	],
+	"workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
+	"workspaceFolder": "/${localWorkspaceFolderBasename}"
+}
