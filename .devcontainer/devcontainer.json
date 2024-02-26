@@ -2,9 +2,15 @@
 	"name": "Radar-2024",
 	"dockerFile": "Dockerfile",
 	"runArgs": [
-	  "--privileged"
-	//   "--host"
+	  "--net=host",
+		"--gpus",
+		"all"
 	],
+	"containerEnv": {
+    "NVIDIA_DRIVER_CAPABILITIES": "all",
+    "DISPLAY": "${localEnv:DISPLAY}",
+    "QT_X11_NO_MITSHM": "1"
+  },
 	"workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
 	"workspaceFolder": "/${localWorkspaceFolderBasename}"
 }
