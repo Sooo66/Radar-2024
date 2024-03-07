@@ -1,7 +1,7 @@
 # 项目总配置
 cmake_minimum_required(VERSION 3.12)
-project(Vision-2024)
-set(EXECUTABLE_NAME vision-2024)
+project(radar_2024)
+set(EXECUTABLE_NAME radar_2024)
 
 # 设置编译选项
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
@@ -15,6 +15,7 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
   if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64")
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_COMPILER g++) # Ubuntu 20.04 or 22.04
+    set(CMAKE_CXX_FLAGS -pthread)
   elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64")
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_COMPILER g++-8) # Ubuntu 18.04
@@ -36,11 +37,47 @@ endif()
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
+message("bin: {PROJECT_SOURCE_DIR}/bin")
+
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  roslib
+  std_msgs
+  sensor_msgs
+  cv_bridge
+  message_generation
+  message_runtime
+  image_transport
+)
+find_package(PCL REQUIRED)
+
+catkin_package(CATKIN_DEPENDS
+  roscpp
+  rospy
+  roslib
+  std_msgs
+  sensor_msgs
+  cv_bridge
+  message_generation
+  message_runtime
+  image_transport
+)
+
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  ${PCL_LIBRARY_DIRS}
+)
+
 # 添加可执行文件
+add_executable(lidar_node offlineCloudPoint.cpp)
 add_executable(${EXECUTABLE_NAME} main.cpp)
+
+target_link_libraries(lidar_node ${PCL_LIBRARIES}  ${catkin_LIBRARIES} )
 
 # 编译模块 注意顺序问题
 add_subdirectory(modules/common)
+add_subdirectory(modules/video)
 add_subdirectory(modules/nn)
 add_subdirectory(modules/core)
 

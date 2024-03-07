@@ -3,14 +3,13 @@
 	"dockerFile": "Dockerfile",
 	"runArgs": [
 	  "--net=host",
-		"--gpus",
-		"all"
+		"--gpus=all"
 	],
-	"containerEnv": {
-    "NVIDIA_DRIVER_CAPABILITIES": "all",
-    "DISPLAY": "${localEnv:DISPLAY}",
-    "QT_X11_NO_MITSHM": "1"
-  },
+	// "remoteEnv": {
+  //   "NVIDIA_DRIVER_CAPABILITIES": "all",
+  //   "DISPLAY": "${localEnv:DISPLAY}",
+  //   "QT_X11_NO_MITSHM": "1"
+  // },
 	"workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
 	"workspaceFolder": "/${localWorkspaceFolderBasename}"
 }

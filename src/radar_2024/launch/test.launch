@@ -1,0 +1,7 @@
+<launch>
+    <!-- 启动 RViz -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find radar_2024)/lidar.rviz"/>
+
+    <!-- 启动目标节点 -->
+    <node pkg="radar_2024" type="lidar_node" name="lidar_node" output="screen"/>
+</launch>

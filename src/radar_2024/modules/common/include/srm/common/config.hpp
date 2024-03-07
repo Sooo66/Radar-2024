@@ -10,6 +10,7 @@
 #include <toml.hpp>
 #include <variant>
 #include <vector>
+#include <mutex>
 
 #include "srm/common/tags.hpp"
 
