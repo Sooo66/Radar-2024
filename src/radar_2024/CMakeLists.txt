@@ -39,47 +39,30 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 message("bin: {PROJECT_SOURCE_DIR}/bin")
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  roslib
-  std_msgs
-  sensor_msgs
-  cv_bridge
-  message_generation
-  message_runtime
-  image_transport
-)
-find_package(PCL REQUIRED)
-
-catkin_package(CATKIN_DEPENDS
-  roscpp
-  rospy
-  roslib
-  std_msgs
-  sensor_msgs
-  cv_bridge
-  message_generation
-  message_runtime
-  image_transport
-)
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${PCL_LIBRARY_DIRS}
-)
+# find_package(catkin REQUIRED COMPONENTS
+#   roscpp
+#   rospy
+#   roslib
+#   std_msgs
+#   sensor_msgs
+#   cv_bridge
+#   message_generation
+#   message_runtime
+#   image_transport
+# )
 
 # 添加可执行文件
-add_executable(lidar_node offlineCloudPoint.cpp)
+# add_executable(lidar_node offlineCloudPoint.cpp)
 add_executable(${EXECUTABLE_NAME} main.cpp)
-
-target_link_libraries(lidar_node ${PCL_LIBRARIES}  ${catkin_LIBRARIES} )
 
 # 编译模块 注意顺序问题
 add_subdirectory(modules/common)
 add_subdirectory(modules/video)
+add_subdirectory(modules/viewer)
+add_subdirectory(modules/lidar)
 add_subdirectory(modules/nn)
 add_subdirectory(modules/core)
+
 
 # 链接库主程序
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")

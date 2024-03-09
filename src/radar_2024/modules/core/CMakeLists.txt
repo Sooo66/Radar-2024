@@ -12,5 +12,6 @@ target_include_directories(
 target_link_libraries(
   ${LIB}
   PUBLIC srm_common
-  PUBLIC srm_nn
+  PUBLIC srm_video
+  PUBLIC srm_viewer
 )

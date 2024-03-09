@@ -1,17 +1,14 @@
 # 语法文档：https://toml.io/cn/
 
-fps_limit = 100.0     # 运行帧率，实数
+fps_limit = 30.0     # 运行帧率，实数
 mode = "single"       # 单目模式或双目模式，single, stereo
-type = "stereo_test"  # 机器人类型，hero, infantry, sentry, ...
+type = "single_test"  # 机器人类型，hero, infantry, sentry, ...
 serial = false        # 是否开启串口, true, false
 video.reader = "file" # 视频读取方式, file, camera
 video.writer = false  # 是否录制, true, false
 
 [viewer]
 type = "web" # 视图查看方式, web, local
-
-[test]
-file = "../assets/Car/SJTU.mp4"
 
 [viewer.web]
 shm_name = "srm_viewer_web" # 共享内存名字
@@ -26,15 +23,15 @@ small_ball = [0.47, 0.0168, 0.0032] # 小弹丸参数：空气阻力系数，直
 
 [nn.yolo.armor]
 coreml = "../assets/models/armor.mlmodelc"
-tensorrt = "../assets/models/best_armor.onnx"
-class_num = 12
+tensorrt = "../assets/models/armor.onnx"
+class_num = 36
 point_num = 4
 
-[nn.yolo.car]
+[nn.yolo.rune]
 coreml = "../assets/models/rune.mlmodelc"
-tensorrt = "../assets/models/best.onnx"
-class_num = 1
-point_num = 4
+tensorrt = "../assets/models/rune.onnx"
+class_num = 4
+point_num = 5
 
 [coord.single_test]
 ea_cam_imu = [0.0, -3.0, 0.0]            # 相机相对陀螺仪平面的欧拉角；方向：右, 上, 右；单位：度
@@ -89,7 +86,7 @@ video1 = "../assets/outpost/blue.mp4"
 [video.single_test.file]
 cam_num = 1
 camera0 = "stereo_l"
-video0 = "../assets/outpost/blue.mp4"
+video0 = "../assets/tup/SJTU.mp4"
 
 [video.cameras.stereo_l]
 sn = "00L28498178"

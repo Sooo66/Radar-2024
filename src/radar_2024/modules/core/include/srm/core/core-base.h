@@ -3,7 +3,8 @@
 
 #include "srm/common.hpp"
 #include "fps-controller.h"
-#include "srm/nn.hpp"
+#include "srm/video.hpp"
+#include "srm/viewer.hpp"
 
 /// 抓取并处理来自操作系统的控制信号
 void SignalHandler(int);
@@ -34,9 +35,29 @@ class BaseCore {
   virtual int Run();
 
  protected:
+  std::vector<video::Frame> frame_list_;  ///< 帧数据
+  
+    /**
+   * @brief 取图回调函数
+   * @details 设第二个键值为k, 则表示这是第k个视频源的回调函数
+   */
+  std::vector<std::pair<srm::video::FrameCallback, int>> frame_callback_list_;
+
+  
   std::unique_ptr<srm::core::FpsController> fps_controller_;  ///< 帧率控制器
-  std::unique_ptr<srm::nn::Yolo> car_;  ///< 车辆检测神经网络
-  std::unique_ptr<srm::nn::Yolo> armor_;  ///< 装甲板检测神经网络
+  std::unique_ptr<srm::video::Reader> reader_;  ///< 视频读入接口
+  std::unique_ptr<srm::nn::Detector> detector_; ///< 装甲板检测接口
+  std::unique_ptr<viewer::VideoViewer> viewer_;        ///< 图像显示接口
+
+
+ 
+ protected:
+  virtual bool InitializeReader();
+  virtual bool InitializeDetector();
+  virtual bool InitializeViewer();
+
+  virtual bool UpdateFrameList(); 
+  
 };
 
 }  // namespace srm::core

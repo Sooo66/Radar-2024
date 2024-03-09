@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../static/3rdparty/codemirror.css" />
+  <link rel="stylesheet" href="../static/3rdparty/dialog.css" />
+  <link rel="stylesheet" href="../static/style.css">
+  <title>PID调试</title>
+</head>
+
+<body>
+  <div id="container">
+    <div id="left">
+      <textarea id="text" style="width: 100%; height: 100%">{{ config }}</textarea>
+    </div>
+    <div id="resize"></div>
+    <div id="right">
+      <div id="main" style="width: 100%; height: 80%;">
+        <img id="video" src="{{ url_for('VideoStream') }}">
+      </div>
+      <br>
+      <button id="pauseButton" class="pauseButton">暂停</button>
+    </div>
+  </div>
+
+</body>
+
+<script src="../static/3rdparty/echarts.min.js"></script>
+<script src="../static/3rdparty/codemirror.js"></script>
+<script src="../static/3rdparty/toml.js"></script>
+<script src="../static/3rdparty/vim.js"></script>
+<script src="../static/3rdparty/dialog.js"></script>
+<script src="../static/3rdparty/searchcursor.js"></script>
+<script src="../static/slider.js"></script>
+<script src="../static/editor.js"></script>
+<script src="../static/data.js"></script>
+
+</html>

@@ -44,8 +44,6 @@ class Yolo {
    */
   virtual std::vector<Objects> Infer(cv::Mat image);
 
-  virtual std::vector<cv::Mat> PostProcess(std::vector<Objects> objs, cv::Mat image);
-
  protected:
   std::string model_file_path_, model_cache_path_;  ///< 模型文件路径和缓存文件路径
   int num_classes_{};  ///< 识别物体的种类数量
