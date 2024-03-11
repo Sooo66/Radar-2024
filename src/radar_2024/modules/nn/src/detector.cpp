@@ -45,7 +45,7 @@ bool Detector::Run(std::vector<cv::Mat> REF_IN image_list, std::vector<Armor> RE
         Armor armor;
         armor.id = obj->cls % 6 + 1;
         armor.color = static_cast<Color>(obj->cls / 6 + 1);
-        armor.roi.push_back(roi);
+        armor.roi.push_back(std::move(roi));
         armor.pts_list.push_back(std::array(float, 4){obj->x1, obj->y1, obj->x2, obj->y2});
         armor_list.push_back(std::move(armor));
       }

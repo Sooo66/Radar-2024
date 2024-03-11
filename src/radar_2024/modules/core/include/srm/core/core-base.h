@@ -5,6 +5,7 @@
 #include "fps-controller.h"
 #include "srm/video.hpp"
 #include "srm/viewer.hpp"
+#include "srm/nn.hpp"
 
 /// 抓取并处理来自操作系统的控制信号
 void SignalHandler(int);
