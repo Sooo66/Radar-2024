@@ -48,7 +48,7 @@ class BaseCore {
   std::unique_ptr<srm::core::FpsController> fps_controller_;  ///< 帧率控制器
   std::unique_ptr<srm::video::Reader> reader_;  ///< 视频读入接口
   std::unique_ptr<srm::nn::Detector> detector_; ///< 装甲板检测接口
-  std::unique_ptr<viewer::VideoViewer> viewer_;        ///< 图像显示接口
+  std::unique_ptr<srm::viewer::VideoViewer> viewer_;        ///< 图像显示接口
 
 
  

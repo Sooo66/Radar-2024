@@ -3,10 +3,9 @@
 #include <cstring>
 #include <opencv2/opencv.hpp>
 
-#include "srm/common/factory.hpp"
 #include "srm/common/tags.hpp"
-#include "cuda-help.h"
 #include "info.hpp"
+#include "yolo.h"
 
 namespace srm::nn {
 
@@ -32,9 +31,11 @@ class Detector {
    */
   virtual bool Run(std::vector<cv::Mat> REF_IN image_list, std::vector<Armor> REF_OUT armor_list);
 
+  // virtual bool ArmorFilter(std::vector<Armor> REF_IN armor_list_in, std::vector<Armor> REF_OUT armor_list_out);
+
  protected:
-  std::unique_ptr<CarNetwork> car_nn_;
-  std::unique_ptr<ArmorNetwork> armor_nn_;
+  std::unique_ptr<Yolo> car_nn_;
+  std::unique_ptr<Yolo> armor_nn_;
 };
 
 }  // namespace srm::nn

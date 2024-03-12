@@ -1,6 +1,6 @@
 # 语法文档：https://toml.io/cn/
 
-fps_limit = 30.0     # 运行帧率，实数
+fps_limit = 5.0     # 运行帧率，实数
 mode = "single"       # 单目模式或双目模式，single, stereo
 type = "single_test"  # 机器人类型，hero, infantry, sentry, ...
 serial = false        # 是否开启串口, true, false
@@ -32,6 +32,14 @@ coreml = "../assets/models/rune.mlmodelc"
 tensorrt = "../assets/models/rune.onnx"
 class_num = 4
 point_num = 5
+
+[nn.car]
+model_path = "../assets/models/best.onnx"
+class_num = 1
+
+[nn.armor]
+model_path = "../assets/models/best_armor.onnx"
+class_num = 12
 
 [coord.single_test]
 ea_cam_imu = [0.0, -3.0, 0.0]            # 相机相对陀螺仪平面的欧拉角；方向：右, 上, 右；单位：度

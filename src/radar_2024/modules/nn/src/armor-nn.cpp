@@ -1,4 +1,5 @@
 #include "srm/nn/yolo.h"
+#include "srm/nn/info.hpp"
 namespace srm::nn {
 
 // struct Armor {
@@ -28,9 +29,9 @@ ArmorNetwork::~ArmorNetwork() {
   cudaFreeHost(output_data_host_);
 }
 
-Armor ArmorNetwork::Infer(ROI REF_IN roi) {
-  auto &image = roi.roi_mat;
+// Armor ArmorNetwork::Infer(ROI REF_IN roi) {
+//   auto &image = roi.roi_mat;
 
-}
+// }
 
 } // namespace srm::n

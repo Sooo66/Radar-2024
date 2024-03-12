@@ -14,4 +14,5 @@ target_link_libraries(
   PUBLIC srm_common
   PUBLIC srm_video
   PUBLIC srm_viewer
+  PUBLIC srm_nn
 )

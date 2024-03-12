@@ -85,40 +85,39 @@ bool BaseCore::UpdateFrameList() {
   }
 
   // auto show_image = frame_list_[0].image.clone();
-  std::vector<cv::Mat> show_image_list(frame_list_.size());
-  for (auto &t: fram_list_) {
-    show_image_list.push_back(frame_list_.image);
+  // LOG(INFO) << "fuck";
+  std::vector<cv::Mat> show_image_list;
+  for (auto &t: frame_list_) {
+    show_image_list.push_back(t.image);
   }
-  std::vector<Armor> armor_list;
+  std::vector<srm::nn::Armor> armor_list;
+  // std::vector<std::vector<Armor>> armor_list(frame_list_.size());
   detector_->Run(show_image_list, armor_list);
-  auto show_image = show_image_list[0];
-  
+  auto show_image = show_image_list[0].clone();
+
   for (auto &armor: armor_list) {
-  auto &roi_list = armor.roi_list;
-  auto &pts_list = armor.pts_list;
-
-  // 绘制装甲板的 ROI 和角点
-  for (size_t i = 0; i < roi_list.size(); i++) {
-    auto &roi = roi_list[i];
-    auto &pts = pts_list[i];
-
-    // 绘制 ROI
-    cv::rectangle(show_image, roi.top_left, cv::Point2f(roi.top_left.x + roi.width, roi.top_left.y + roi.height), cv::Scalar(0, 255, 0), 2);
-
-    // 在 ROI 旁边添加文本 "car"
-    cv::putText(show_image, "car", cv::Point2f(roi.top_left.x, roi.top_left.y - 5), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 1);
-
-    // 绘制装甲板的角点
-    for (auto &pt: pts) {
-      cv::circle(show_image, pt, 3, cv::Scalar(0, 0, 255), -1);
+    auto draw_color = cv::Scalar(255, 255, 255);
+    std::string id = "";
+    if (armor.color == srm::nn::Color::kBlue) {
+      draw_color = cv::Scalar(0, 255, 0);
+      id += "B";
     }
-
-    // 在角点旁边添加文本 "armor"
-    cv::putText(show_image, "armor", pts[0] + cv::Point2f(5, -5), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 1);
+    else {
+      draw_color = cv::Scalar(0, 0, 255);
+      id += "R";
+    }
+    id += std::to_string(armor.id);
+    // roi
+    auto &roi = armor.roi;
+    cv::rectangle(show_image, roi.top_left, cv::Point2f(roi.top_left.x + roi.width, roi.top_left.y + roi.height), draw_color, 4);
+    cv::putText(show_image, id, cv::Point2f(roi.top_left.x, roi.top_left.y - 5), cv::FONT_HERSHEY_SIMPLEX, 1, draw_color, 2);
+    // armor
+    cv::rectangle(show_image, roi.top_left + armor.pts[0], roi.top_left + armor.pts[1], draw_color, 4);
   }
-}
 
-  viewer_->SendFrame(show_image);
+  // viewer_->SendFrame(show_image);
+  cv::imshow("image", show_image);
+  cv::waitKey(10);
 
   show_warning = ret;
   return ret;
@@ -129,6 +128,8 @@ int BaseCore::Run() {
   while (!exit_signal) {
     fps_controller_->Tick();
     LOG_EVERY_N(INFO, 100) << fps_controller_->GetFPS();
+    cv::namedWindow("image", cv::WINDOW_NORMAL);
+    cv::resizeWindow("image", 1920, 1080);
     if (!UpdateFrameList()) {
       continue;
     }

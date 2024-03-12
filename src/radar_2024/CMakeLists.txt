@@ -59,7 +59,7 @@ add_executable(${EXECUTABLE_NAME} main.cpp)
 add_subdirectory(modules/common)
 add_subdirectory(modules/video)
 add_subdirectory(modules/viewer)
-add_subdirectory(modules/lidar)
+# add_subdirectory(modules/lidar)
 add_subdirectory(modules/nn)
 add_subdirectory(modules/core)
 

@@ -1,4 +1,6 @@
 #include <srm/nn/detector.h>
+#include <srm/common/config.hpp>
+#include <algorithm>
 namespace srm::nn {
 
 bool Detector::Initialize() {
@@ -25,34 +27,52 @@ bool Detector::Initialize() {
 }
 
 bool Detector::Run(std::vector<cv::Mat> REF_IN image_list, std::vector<Armor> REF_OUT armor_list) {
-  if (image_list.size() == 1) {
-    const auto& image = image_list[0];
+  for (int i = 0; i < image_list.size(); i ++) {
+    const auto& image = image_list[i];
     auto cars = car_nn_->Infer(image);
     for (auto&& car: cars) {
       ROI roi;
-      auto roi_mat = cv::Rect(car.x1, car.y1, car.x2 - car.x1, car.y2 - car.y1);
-      roi.topleft = {car.x1, car.y1};
+      auto roi_mat = image(cv::Rect(car.x1, car.y1, car.x2 - car.x1, car.y2 - car.y1));
+      roi.top_left = {car.x1, car.y1};
       roi.width = car.x2 - car.x1;
       roi.height = car.y2 - car.y1;
-      roi.roi_mat = roi_mat;
-      auto objs = armor_nn_->Infer(roi_mat);
-      auto obj = std::max_element(objs.begin(), objs.end(), 
-                                  [](const Objects& a, const Objects& b) {
-                                    return a.prob < b.prob;
-                                  }
-                                  );
+      std::vector<Objects> objs = armor_nn_->Infer(roi_mat);
+      auto obj = std::max_element(objs.begin(), objs.end(),
+                                  [](const Objects& a, const Objects &b) { return a.prob < b.prob; }
+                                 );
       if (obj != objs.end()) {
         Armor armor;
         armor.id = obj->cls % 6 + 1;
         armor.color = static_cast<Color>(obj->cls / 6 + 1);
-        armor.roi.push_back(std::move(roi));
-        armor.pts_list.push_back(std::array(float, 4){obj->x1, obj->y1, obj->x2, obj->y2});
+        armor.roi = std::move(roi);
+        armor.prob = obj->prob;
+        armor.pts = std::array<cv::Point2f, 2>{ {cv::Point2f(obj->x1, obj->y1), cv::Point2f(obj->x2, obj->y2)} };
+        armor.source = i;
         armor_list.push_back(std::move(armor));
       }
     }
-    return true;
+    // std::sort(armor_list[i].begin(), armor_list[i].end(), [](const Armor& a, const Armor& b) {
+    //   return a.prob > b.prob;
+    // });
+    // armor_list[i].erase(std::unique(armor_list[i].begin(), armor_list[i].end(), [](const Armor& a, const Armor& b) {
+    //   return a.id == b.id;
+    // }), armor_list[i].end());
   }
+
+  // ArmorFilter
+  std::sort(armor_list.begin(), armor_list.end(), [](const Armor& a, const Armor& b) {
+    return a.prob > b.prob;
+  });
+  armor_list.erase(std::unique(armor_list.begin(), armor_list.end(), [](const Armor& a, const Armor& b) {
+    return a.id == b.id;
+  }), armor_list.end());
   return true;
 }
+
+// bool Detector::ArmorFilter(std::vector<std::vector<Armor>> REF_IN armor_list_in, std::vector<Armor> REF_OUT armor_list_out) {
+//   std::sort(armor_list_in.begin(), armor_list_in.end(), [](const Armor& a, const Armor& b) {
+
+//   })
+// }
 
 } // namespace srm::n
