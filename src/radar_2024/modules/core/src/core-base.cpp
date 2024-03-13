@@ -84,14 +84,11 @@ bool BaseCore::UpdateFrameList() {
                  << "Wait for reconnecting the camera or press Ctrl-C to exit.";
   }
 
-  // auto show_image = frame_list_[0].image.clone();
-  // LOG(INFO) << "fuck";
   std::vector<cv::Mat> show_image_list;
   for (auto &t: frame_list_) {
     show_image_list.push_back(t.image);
   }
   std::vector<srm::nn::Armor> armor_list;
-  // std::vector<std::vector<Armor>> armor_list(frame_list_.size());
   detector_->Run(show_image_list, armor_list);
   auto show_image = show_image_list[0].clone();
 

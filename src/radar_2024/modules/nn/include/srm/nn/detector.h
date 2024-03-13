@@ -31,8 +31,6 @@ class Detector {
    */
   virtual bool Run(std::vector<cv::Mat> REF_IN image_list, std::vector<Armor> REF_OUT armor_list);
 
-  // virtual bool ArmorFilter(std::vector<Armor> REF_IN armor_list_in, std::vector<Armor> REF_OUT armor_list_out);
-
  protected:
   std::unique_ptr<Yolo> car_nn_;
   std::unique_ptr<Yolo> armor_nn_;

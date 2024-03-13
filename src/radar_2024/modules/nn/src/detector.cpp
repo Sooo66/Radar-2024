@@ -51,12 +51,6 @@ bool Detector::Run(std::vector<cv::Mat> REF_IN image_list, std::vector<Armor> RE
         armor_list.push_back(std::move(armor));
       }
     }
-    // std::sort(armor_list[i].begin(), armor_list[i].end(), [](const Armor& a, const Armor& b) {
-    //   return a.prob > b.prob;
-    // });
-    // armor_list[i].erase(std::unique(armor_list[i].begin(), armor_list[i].end(), [](const Armor& a, const Armor& b) {
-    //   return a.id == b.id;
-    // }), armor_list[i].end());
   }
 
   // ArmorFilter
@@ -68,11 +62,5 @@ bool Detector::Run(std::vector<cv::Mat> REF_IN image_list, std::vector<Armor> RE
   }), armor_list.end());
   return true;
 }
-
-// bool Detector::ArmorFilter(std::vector<std::vector<Armor>> REF_IN armor_list_in, std::vector<Armor> REF_OUT armor_list_out) {
-//   std::sort(armor_list_in.begin(), armor_list_in.end(), [](const Armor& a, const Armor& b) {
-
-//   })
-// }
 
 } // namespace srm::n

@@ -6,6 +6,7 @@
 #include "srm/video.hpp"
 #include "srm/viewer.hpp"
 #include "srm/nn.hpp"
+#include "srm/lidar.hpp"
 
 /// 抓取并处理来自操作系统的控制信号
 void SignalHandler(int);
@@ -49,6 +50,7 @@ class BaseCore {
   std::unique_ptr<srm::video::Reader> reader_;  ///< 视频读入接口
   std::unique_ptr<srm::nn::Detector> detector_; ///< 装甲板检测接口
   std::unique_ptr<srm::viewer::VideoViewer> viewer_;        ///< 图像显示接口
+  std::unique_ptr<srm::lidar::Lidar> lidar_;        ///< 深度图处理接口
 
 
  

@@ -39,28 +39,65 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 message("bin: {PROJECT_SOURCE_DIR}/bin")
 
-# find_package(catkin REQUIRED COMPONENTS
-#   roscpp
-#   rospy
-#   roslib
-#   std_msgs
-#   sensor_msgs
-#   cv_bridge
-#   message_generation
-#   message_runtime
-#   image_transport
-# )
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  roslib
+  std_msgs
+  sensor_msgs
+  cv_bridge
+  message_generation
+  message_runtime
+  image_transport
+)
+find_package(PCL REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+catkin_package(CATKIN_DEPENDS
+	roscpp
+  rospy
+  roslib
+  std_msgs
+	sensor_msgs
+  cv_bridge
+  message_generation
+  message_runtime
+  image_transport
+	)
 
 # 添加可执行文件
-# add_executable(lidar_node offlineCloudPoint.cpp)
+add_executable(lidar_node offlineCloudPoint.cpp)
 add_executable(${EXECUTABLE_NAME} main.cpp)
+
+target_include_directories(
+  lidar_node
+  PUBLIC ${catkin_INCLUDE_DIRS}
+  PUBLIC ${PCL_INCLUDE_DIRS}
+  PUBLIC ${EIGEN3_INCLUDE_DIR}
+)
+
+target_link_libraries(
+  lidar_node
+  PUBLIC ${catkin_LIBRARIES}
+  PUBLIC ${PCL_LIBRARIES}
+  PUBLIC ${EIGEN3_LIBRARIES}
+)
+
+add_definitions(${PCL_DEFINITIONS})
+
+target_link_libraries(
+  lidar_node
+  PUBLIC ${catkin_LIBRARIES}
+  PUBLIC ${PCL_LIBRARIES}
+  PUBLIC ${EIGEN3_LIBRARIES}
+)
 
 # 编译模块 注意顺序问题
 add_subdirectory(modules/common)
 add_subdirectory(modules/video)
 add_subdirectory(modules/viewer)
-# add_subdirectory(modules/lidar)
 add_subdirectory(modules/nn)
+add_subdirectory(modules/lidar)
 add_subdirectory(modules/core)
 
 
