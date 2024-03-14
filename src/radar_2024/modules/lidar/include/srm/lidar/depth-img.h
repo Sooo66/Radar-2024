@@ -5,6 +5,7 @@
 #include <opencv2/core/eigen.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <memory>
 #include <queue>
 #include <vector>
@@ -33,6 +34,8 @@ class Lidar {
    * @return 是否成功得到深度
    */
   float GetDepth(cv::Point2f REF_IN x, cv::Point2f REF_IN y);
+
+  cv::Mat Show();
 
  protected:
   Buffer<Eigen::Matrix<int, 2, kPointCloudNum>, kBufferSize> buffer_;  ///< 点云队列

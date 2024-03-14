@@ -7,13 +7,13 @@
 #include <string>
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "offline_node");
+  ros::init(argc, argv, "lidar_node");
   ros::NodeHandle nh;
-  ros::Publisher publisher = nh.advertise<sensor_msgs::PointCloud2>("lidar", 1000);
+  ros::Publisher publisher = nh.advertise<sensor_msgs::PointCloud2>("lidar_node", 1000);
   ros::Rate rate(10);
 
   std::ifstream ifs;
-  ifs.open("/Radar-2024/src/radar_2024/assets/tup/pcds.txt");
+  ifs.open("/home/sooo/Desktop/Radar-2024/src/radar_2024/assets/tup/pcds.txt");
   if (!ifs.is_open()) {
     ROS_ERROR("Failed to open txt.");
     return -1;
@@ -31,9 +31,9 @@ int main(int argc, char **argv) {
     if (line.compare("") == 0) {
       ifs.clear();
       ifs.seekg(0, std::ios::beg);
-      auto end = ros::Time::now();
-      std::cout << "total time: " << end - start << "\n";
-      break;
+      // auto end = ros::Time::now();
+      // std::cout << "total time: " << end - start << "\n";
+      // break;
     }
 
     if (line != "-e-") {
@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
       msg.header.stamp = ros::Time::now();
       pcl::toROSMsg(cloud, msg);
       msg.header.frame_id = "map";
-      std::cout << ros::Time::now() << "\n";
+      // std::cout << ros::Time::now() << "\n";
       publisher.publish(msg);
       rate.sleep();
       cloud.clear();

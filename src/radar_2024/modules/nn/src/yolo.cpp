@@ -72,7 +72,7 @@ namespace srm::nn
     checkRuntime(cudaStreamSynchronize(stream_));
     auto end = std::chrono::system_clock::now();
     output_data_ = output_data_host_;
-    LOG(INFO) << "Detection time cost: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    // LOG(INFO) << "Detection time cost: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
     std::vector<Objects> objs;
     GetObjects(objs);

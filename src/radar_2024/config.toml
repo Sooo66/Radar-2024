@@ -34,12 +34,49 @@ class_num = 4
 point_num = 5
 
 [nn.car]
-model_path = "../assets/models/best.onnx"
+model_path = "/home/sooo/Desktop/Radar-2024/src/radar_2024/assets/models/best.onnx"
 class_num = 1
 
 [nn.armor]
-model_path = "../assets/models/best_armor.onnx"
+model_path = "/home/sooo/Desktop/Radar-2024/src/radar_2024/assets/models/best_armor.onnx"
 class_num = 12
+
+[lidar]
+intrinsic_mat = [
+    "opencv-matrix",
+    { rows = 3, cols = 3, data = [
+        4264.287152736516,
+        0,
+        1487.2338408867588,
+        0,
+        4259.732379159157,
+        1011.6343695179662,
+        0,
+        0,
+        1,
+    ] },
+]
+homogeneous_mat = [
+    "opencv-matrix",
+    { rows = 4, cols = 4, data = [
+        -0.175911942,
+        -0.984001587,
+        0.028211078,
+        -0.089828774,
+        -0.006090403,
+        -0.027569525,
+        -0.999601335,
+        0.016347722,
+        0.984387066,
+        -0.176013629,
+        -0.001143158,
+        -0.023910738,
+        0,
+        0,
+        0,
+        1
+    ] },
+]
 
 [coord.single_test]
 ea_cam_imu = [0.0, -3.0, 0.0]            # 相机相对陀螺仪平面的欧拉角；方向：右, 上, 右；单位：度
@@ -94,7 +131,7 @@ video1 = "../assets/outpost/blue.mp4"
 [video.single_test.file]
 cam_num = 1
 camera0 = "stereo_l"
-video0 = "../assets/tup/SJTU.mp4"
+video0 = "/home/sooo/Desktop/Radar-2024/src/radar_2024/assets/tup/SJTU.mp4"
 
 [video.cameras.stereo_l]
 sn = "00L28498178"

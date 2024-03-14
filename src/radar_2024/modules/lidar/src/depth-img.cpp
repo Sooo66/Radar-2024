@@ -82,4 +82,16 @@ float Lidar::GetDepth(cv::Point2f REF_IN x, cv::Point2f REF_IN y) {
   return sum / cnt;
 }
 
+cv::Mat Lidar::Show() {
+  cv::Mat depth_img(height_, width_, CV_8UC3);
+  for (size_t i = 0; i < height_; i ++) {
+    for (size_t j = 0; j < width_; j ++) {
+      // depth_img.at<float>(i, j) = depth_mat_[i][j] * 255;
+      int depth = static_cast<int>(depth_mat_[i][j] * 255);
+      depth_img.at<cv::Vec3b>(i, j) = cv::Vec3b(depth, depth, depth);
+    }
+  }
+  return depth_img;
+}
+
 }  // namespace srm::lidar

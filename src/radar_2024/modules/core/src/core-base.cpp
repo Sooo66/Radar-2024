@@ -47,24 +47,53 @@ bool BaseCore::InitializeDetector() {
   return true;
 }
 
-bool BaseCore::Initialize() {
+bool BaseCore::InitializeLidar() {
+  lidar_ = std::make_unique<lidar::Lidar>();
+
+  lidar_subscriber_ = node_handler_->subscribe<sensor_msgs::PointCloud2>("lidar_node", 1, [this](const sensor_msgs::PointCloud2::ConstPtr& msg) {
+    pcl::PointCloud<pcl::PointXYZ> point_cloud;
+    pcl::fromROSMsg(*msg, point_cloud);
+    lidar_->Update(point_cloud);
+  });
+  
+  cv::Size img_size = frame_list_[0].image.size();
+  if (!lidar_->Initialize(img_size, cfg.Get<cv::Mat>({"lidar.intrinsic_mat"}), cfg.Get<cv::Mat>({"lidar.homogeneous_mat"}))) {
+    LOG(ERROR) << "Failed to initialize lidar.";
+    return false;
+  }
+  lidar_thread_ = std::thread([](srm::lidar::Lidar *self) {
+    while (!exit_signal) {
+      ros::spinOnce();
+    }
+  }, this->lidar_.get());
+  LOG(INFO) << "Lidar and Lidar Thread are initialized successfully.";
+  return true;
+}
+
+bool BaseCore::Initialize(ros::NodeHandle* nh) {
   fps_controller_ = std::make_unique<FpsController>();
   fps_controller_->Initialize(srm::cfg.Get<double>({"fps_limit"}));
+
+  node_handler_ = std::make_shared<ros::NodeHandle>();
+  node_handler_.reset(nh);
+
   bool ret = true;
   ret &= InitializeReader();
   ret &= InitializeViewer();
   ret &= InitializeDetector();
+  ret &= InitializeLidar();
   if (!ret) {
     reader_.reset();
     viewer_.reset();
     detector_.reset();
+    lidar_.reset();
     return false;
   }
   for (auto REF_IN[callback, id] : frame_callback_list_) {
     reader_->RegisterFrameCallback(callback, this, id);  // 注册回调函数
   }
   
-  LOG(INFO) << "Initializing Radar";
+  LOG(INFO) << "Initializing Radar Successfully.";
   return true;
 }
 
@@ -104,16 +133,29 @@ bool BaseCore::UpdateFrameList() {
       id += "R";
     }
     id += std::to_string(armor.id);
+    std::string depth = "";
+    float armor_depth = lidar_->GetDepth(armor.pts[0], armor.pts[1]);
+    if (armor_depth > 0) {
+      depth = std::to_string(armor_depth);
+    }
+    else {
+      depth = "N/A";
+    }
+    LOG(INFO) << depth;
     // roi
     auto &roi = armor.roi;
     cv::rectangle(show_image, roi.top_left, cv::Point2f(roi.top_left.x + roi.width, roi.top_left.y + roi.height), draw_color, 4);
     cv::putText(show_image, id, cv::Point2f(roi.top_left.x, roi.top_left.y - 5), cv::FONT_HERSHEY_SIMPLEX, 1, draw_color, 2);
+    cv::putText(show_image, depth, cv::Point2f(roi.top_left.x, roi.top_left.y + roi.height + 20), cv::FONT_HERSHEY_SIMPLEX, 1, draw_color, 2);
     // armor
     cv::rectangle(show_image, roi.top_left + armor.pts[0], roi.top_left + armor.pts[1], draw_color, 4);
   }
 
+  cv::Mat depth_img = lidar_->Show();
+
   // viewer_->SendFrame(show_image);
   cv::imshow("image", show_image);
+  cv::imshow("lidar", depth_img);
   cv::waitKey(10);
 
   show_warning = ret;
@@ -127,6 +169,8 @@ int BaseCore::Run() {
     LOG_EVERY_N(INFO, 100) << fps_controller_->GetFPS();
     cv::namedWindow("image", cv::WINDOW_NORMAL);
     cv::resizeWindow("image", 1920, 1080);
+    cv::namedWindow("lidar", cv::WINDOW_NORMAL);
+    cv::resizeWindow("lidar", 1920, 1080);
     if (!UpdateFrameList()) {
       continue;
     }
@@ -138,6 +182,10 @@ BaseCore::~BaseCore() {
   for (auto REF_IN[callback, id] : frame_callback_list_) {
     reader_->UnregisterFrameCallback(callback, id);
     delete callback;
+  }
+
+  if (lidar_thread_.joinable()) {
+    lidar_thread_.join();
   }
 }
 
