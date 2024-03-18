@@ -22,7 +22,7 @@ class Lidar {
   Lidar() = default;
   ~Lidar() = default;
 
-  bool Initialize(cv::Size REF_IN img_size, cv::Mat REF_IN intrinsic_mat, cv::Mat REF_IN homogeneous_mat);
+  bool Initialize(cv::Size REF_IN img_size, std::vector<cv::Mat REF_IN> intrinsic_mat, std::vector<cv::Mat> REF_IN homogeneous_mat);
 
   void Update(pcl::PointCloud<pcl::PointXYZ> REF_IN point_cloud);
 
@@ -38,18 +38,20 @@ class Lidar {
   cv::Mat Show();
 
  protected:
-  Buffer<Eigen::Matrix<int, 2, kPointCloudNum>, kBufferSize> buffer_;  ///< 点云队列
+  int source_count_;
 
-  cv::Mat intrinsic_mat_;                ///< 相机内参矩阵
-  cv::Mat homogeneous_mat_;              ///< 雷达到相机的外参变换矩阵
+  std::vector<Buffer<Eigen::Matrix<int, 2, kPointCloudNum>, kBufferSize>> buffer_;  ///< 点云队列
 
-  Eigen::Matrix<float, 3, 3> intrinsic_mat_eigen_; ///< eigen格式相机内参矩阵
-  Eigen::Matrix<float, 4, 4> homogeneous_mat_eigen_; ///< eigen格式雷达到相机的外参变换矩阵
+  std::vector<cv::Mat> intrinsic_mat_;                ///< 相机内参矩阵
+  std::vector<cv::Mat> homogeneous_mat_;              ///< 雷达到相机的外参变换矩阵
+
+  std::vector<Eigen::Matrix<float, 3, 3>> intrinsic_mat_eigen_; ///< eigen格式相机内参矩阵
+  std::vector<Eigen::Matrix<float, 4, 4>> homogeneous_mat_eigen_; ///< eigen格式雷达到相机的外参变换矩阵
 
   int height_{};
   int width_{};
 
-  std::vector<std::vector<float>> depth_mat_; ///< 深度图
+  std::vector<std::vector<std::vector<float>>> depth_mat_; ///< 深度图
 };
 
 }  // namespace srm::lidar

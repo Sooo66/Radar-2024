@@ -17,18 +17,7 @@ struct ROI {
   cv::Point2f top_left;     ///< roi左上角在原图中的坐标
   int width;              ///< roi的宽
   int height;             ///< roi的长
-  // cv::Mat roi_mat;        ///< roi本身
 };
-
-// struct Armor {
-//   ROI roi;                       ///< 车辆的roi 
-//   float x1;                      ///< 预测框左上角顶点横坐标
-//   float y1;                      ///< 预测框左上角顶点纵坐标
-//   float x2;                      ///< 预测框右下角顶点横坐标
-//   float y2;                      ///< 预测框右下角顶点纵坐标
-//   float prob;                    ///< 置信度
-//   int cls;                       ///< 类编号
-// }
 
 /// 传入战斗信息
 struct BattleInfo {
@@ -49,14 +38,13 @@ struct LocateInfo {
 
 /// 装甲板信息
 struct Armor {
-  // std::vector<ROI> roi_list;                         ///< 该装甲板在各个图片列表下的roi
-  // std::vector<std::array<cv::Point2f, 4>> pts_list;  ///< 该装甲板在各个图片列表下的角点信息
   ROI roi;                                           ///< 该装甲板roi  
   std::array<cv::Point2f, 2> pts;                    ///< 装甲板角点信息
   float prob;
   int id;                                            ///< 装甲板编号
   Color color;                                       ///< 装甲板颜色
   int source;                                        ///< 该装甲板是由哪个相机源预测得到的
+  float depth;
 };
 
 }  // namespace srm::autoaim

@@ -57,7 +57,18 @@ bool BaseCore::InitializeLidar() {
   });
   
   cv::Size img_size = frame_list_[0].image.size();
-  if (!lidar_->Initialize(img_size, cfg.Get<cv::Mat>({"lidar.intrinsic_mat"}), cfg.Get<cv::Mat>({"lidar.homogeneous_mat"}))) {
+
+  std::vector<cv::Mat> intrinsic_mat, homogeneous_mat;
+  for (size_t i = 0; i < reader_->SourceCount(); i ++) {
+    std::prefix = "lidar.";
+    prefix += std::to_string(i);
+    cv::Mat K = cfg.Get<cv::Mat>({prefix, "intrinsic_mat"});
+    intrinsic_mat.push_back(K);
+    cv::Mat T = cfg.Get<cv::Mat>({prefix, "homogeneous_mat"});
+    homogeneous_mat.push_back(homogeneous_mat);
+  }
+
+  if (!lidar_->Initialize(img_size, intrinsic_mat, homogeneous_mat)) {
     LOG(ERROR) << "Failed to initialize lidar.";
     return false;
   }
@@ -70,6 +81,20 @@ bool BaseCore::InitializeLidar() {
   return true;
 }
 
+bool BaseCore::InitializeLocate() {
+  locater_ = std::make_unique<locate::Locate>();
+  std::vector<cv::Mat> intrinsic_mat, distortion_mat;
+  for (int i = 0; i < reader_->SourceCount(); i ++) {
+    intrinsic_mat.push_back(reader_->IntrinsicMat(i));
+    distortion_mat.push_back(reader_->DistortionMat(i))
+  }
+  if (!locater_->Initialize(intrinsic_mat, distortion_mat)) {
+    LOG(INFO) << "Failed to initialize locater.";
+    return false;
+  }
+  return true;
+}
+
 bool BaseCore::Initialize(ros::NodeHandle* nh) {
   fps_controller_ = std::make_unique<FpsController>();
   fps_controller_->Initialize(srm::cfg.Get<double>({"fps_limit"}));
@@ -77,16 +102,20 @@ bool BaseCore::Initialize(ros::NodeHandle* nh) {
   node_handler_ = std::make_shared<ros::NodeHandle>();
   node_handler_.reset(nh);
 
+  attitude_ = std::make_unique<srm::locate::Attitude>();
+
   bool ret = true;
   ret &= InitializeReader();
   ret &= InitializeViewer();
   ret &= InitializeDetector();
   ret &= InitializeLidar();
+  ret &= InitializeLocate();
   if (!ret) {
     reader_.reset();
     viewer_.reset();
     detector_.reset();
     lidar_.reset();
+    locater_.reset();
     return false;
   }
   for (auto REF_IN[callback, id] : frame_callback_list_) {
@@ -119,43 +148,61 @@ bool BaseCore::UpdateFrameList() {
   }
   std::vector<srm::nn::Armor> armor_list;
   detector_->Run(show_image_list, armor_list);
-  auto show_image = show_image_list[0].clone();
 
   for (auto &armor: armor_list) {
-    auto draw_color = cv::Scalar(255, 255, 255);
-    std::string id = "";
-    if (armor.color == srm::nn::Color::kBlue) {
-      draw_color = cv::Scalar(0, 255, 0);
-      id += "B";
+    float depth = lidar_->GetDepth(armor.source, armor.pts[0], armor.pts[1]);
+    if (depth != -1) {
+      armor.depth = depth;
     }
-    else {
-      draw_color = cv::Scalar(0, 0, 255);
-      id += "R";
-    }
-    id += std::to_string(armor.id);
-    std::string depth = "";
-    float armor_depth = lidar_->GetDepth(armor.pts[0], armor.pts[1]);
-    if (armor_depth > 0) {
-      depth = std::to_string(armor_depth);
-    }
-    else {
-      depth = "N/A";
-    }
-    LOG(INFO) << depth;
-    // roi
-    auto &roi = armor.roi;
-    cv::rectangle(show_image, roi.top_left, cv::Point2f(roi.top_left.x + roi.width, roi.top_left.y + roi.height), draw_color, 4);
-    cv::putText(show_image, id, cv::Point2f(roi.top_left.x, roi.top_left.y - 5), cv::FONT_HERSHEY_SIMPLEX, 1, draw_color, 2);
-    cv::putText(show_image, depth, cv::Point2f(roi.top_left.x, roi.top_left.y + roi.height + 20), cv::FONT_HERSHEY_SIMPLEX, 1, draw_color, 2);
-    // armor
-    cv::rectangle(show_image, roi.top_left + armor.pts[0], roi.top_left + armor.pts[1], draw_color, 4);
   }
 
-  cv::Mat depth_img = lidar_->Show();
+  std::vector<srm::nn::LocateInfo> locate_list;
 
-  // viewer_->SendFrame(show_image);
+  locater_->Run(armor_list, locate_list);
+
+  // 展示在小地图上
+  
+  // 发送串口
+
+  auto show_image = show_image_list[0].clone();
+
+  @todo: 封装Armor.Show()
+  // for (auto &armor: armor_list) {
+  //   auto draw_color = cv::Scalar(255, 255, 255);
+  //   std::string id = "";
+  //   if (armor.color == srm::nn::Color::kBlue) {
+  //     draw_color = cv::Scalar(0, 255, 0);
+  //     id += "B";
+  //   }
+  //   else {
+  //     draw_color = cv::Scalar(0, 0, 255);
+  //     id += "R";
+  //   }
+  //   id += std::to_string(armor.id);
+  //   std::string depth = "";
+  //   float armor_depth = lidar_->GetDepth(armor.pts[0], armor.pts[1]);
+  //   if (armor_depth > 0) {
+  //     depth = std::to_string(armor_depth);
+  //   }
+  //   else {
+  //     depth = "N/A";
+  //   }
+  //   LOG(INFO) << depth;
+  //   // roi
+  //   auto &roi = armor.roi;
+  //   cv::rectangle(show_image, roi.top_left, cv::Point2f(roi.top_left.x + roi.width, roi.top_left.y + roi.height), draw_color, 4);
+  //   cv::putText(show_image, id, cv::Point2f(roi.top_left.x, roi.top_left.y - 5), cv::FONT_HERSHEY_SIMPLEX, 1, draw_color, 2);
+  //   cv::putText(show_image, depth, cv::Point2f(roi.top_left.x, roi.top_left.y + roi.height + 20), cv::FONT_HERSHEY_SIMPLEX, 1, draw_color, 2);
+  //   // armor
+  //   cv::rectangle(show_image, roi.top_left + armor.pts[0], roi.top_left + armor.pts[1], draw_color, 4);
+  // }
+
+  // cv::Mat depth_img = lidar_->Show();
+
+
+
   cv::imshow("image", show_image);
-  cv::imshow("lidar", depth_img);
+
   cv::waitKey(10);
 
   show_warning = ret;
@@ -167,10 +214,10 @@ int BaseCore::Run() {
   while (!exit_signal) {
     fps_controller_->Tick();
     LOG_EVERY_N(INFO, 100) << fps_controller_->GetFPS();
-    cv::namedWindow("image", cv::WINDOW_NORMAL);
-    cv::resizeWindow("image", 1920, 1080);
-    cv::namedWindow("lidar", cv::WINDOW_NORMAL);
-    cv::resizeWindow("lidar", 1920, 1080);
+    // cv::namedWindow("image", cv::WINDOW_NORMAL);
+    // cv::resizeWindow("image", 1920, 1080);
+    // cv::namedWindow("lidar", cv::WINDOW_NORMAL);
+    // cv::resizeWindow("lidar", 1920, 1080);
     if (!UpdateFrameList()) {
       continue;
     }

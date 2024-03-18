@@ -3,6 +3,8 @@ from flask import Flask, render_template, request, jsonify, Response
 import mmap
 import posix_ipc
 import struct
+import cv2
+import numpy as np
 
 shm_name = "srm_viewer_web"
 shm_size = 0x100000
@@ -11,7 +13,7 @@ path = "config.toml"
 app = Flask(__name__)
 
 
-def read_fild(path):
+def read_file(path):
     with open(path, "r") as f:
         data = f.read()
     return data
@@ -30,6 +32,8 @@ def generate():
         frame_data = shm_map[4:frame_size]
         if frame_data is None:
             continue
+        show_frame = cv2.imdecode(np.frombuffer(frame_data, dtype=np.uint8), -1)
+        cv2.imshow("frame", show_frame)
         yield (
             b"--frame\r\n"
             b"Content-Type: image/jpeg\r\n\r\n" + frame_data + b"\r\n\r\n"
@@ -39,7 +43,7 @@ def generate():
 
 @app.route("/")
 def index():
-    config = read_fild(path)
+    config = read_file(path)
     return render_template("video.html", config=config)
 
 

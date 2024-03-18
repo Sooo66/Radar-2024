@@ -60,6 +60,7 @@ bool Detector::Run(std::vector<cv::Mat> REF_IN image_list, std::vector<Armor> RE
   armor_list.erase(std::unique(armor_list.begin(), armor_list.end(), [](const Armor& a, const Armor& b) {
     return a.id == b.id;
   }), armor_list.end());
+
   return true;
 }
 

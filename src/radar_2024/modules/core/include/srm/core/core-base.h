@@ -59,6 +59,7 @@ class BaseCore {
   std::unique_ptr<srm::nn::Detector> detector_; ///< 装甲板检测接口
   std::unique_ptr<srm::viewer::VideoViewer> viewer_;        ///< 图像显示接口
   std::unique_ptr<srm::lidar::Lidar> lidar_;        ///< 深度图处理接口
+  std::unique_ptr<srm::locate::Locate> locater_;  ///< 定位接口
   
   std::thread lidar_thread_;  ///< 点云处理线程
 
@@ -67,6 +68,7 @@ class BaseCore {
   virtual bool InitializeDetector();
   virtual bool InitializeViewer();
   virtual bool InitializeLidar();
+  virtual bool InitializeLocate();
 
   virtual bool UpdateFrameList(); 
   
