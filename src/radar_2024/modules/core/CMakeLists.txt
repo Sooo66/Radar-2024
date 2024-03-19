@@ -16,4 +16,5 @@ target_link_libraries(
   PUBLIC srm_viewer
   PUBLIC srm_nn
   PUBLIC srm_lidar
+  PUBLIC srm_locate
 )

@@ -29,6 +29,9 @@ struct BattleInfo {
 
 /// 传出打弹信息
 struct LocateInfo {
+  ROI roi;
+  std::array<cv::Point2f, 2> pts;
+  float depth;
   int id;
   Color color;
   float x;

@@ -5,16 +5,16 @@ constexpr float Epsilon = 1e-6;
 namespace srm::lidar {
 
 bool Lidar::Initialize(cv::Size REF_IN img_size, std::vector<cv::Mat> REF_IN intrinsic_mat, std::vector<cv::Mat> REF_IN homogeneous_mat) {
-  // intrinsic_mat_ = std::move(intrinsic_mat);
-  // homogeneous_mat_ = std::move(homogeneous_mat);
-
   source_count_ = intrinsic_mat.size();
-  buffer_.resize(source_count_);
+  intrinsic_mat_.resize(source_count_);
+  homogeneous_mat_.resize(source_count_);
+  intrinsic_mat_eigen_.resize(source_count_);
+  homogeneous_mat_eigen_.resize(source_count_);
 
   for (int i = 0; i < source_count_; i ++) {
+
     intrinsic_mat_[i] = std::move(intrinsic_mat[i]);
     homogeneous_mat_[i] = std::move(homogeneous_mat[i]);
-    
     cv::cv2eigen(intrinsic_mat_[i], intrinsic_mat_eigen_[i]);
     cv::cv2eigen(homogeneous_mat_[i], homogeneous_mat_eigen_[i]);
     std::cout << intrinsic_mat_eigen_[i] << "\n";
@@ -22,9 +22,10 @@ bool Lidar::Initialize(cv::Size REF_IN img_size, std::vector<cv::Mat> REF_IN int
   }
 
   height_ = img_size.height, width_ = img_size.width;
-  // depth_mat_.resize(height_, std::vector<float>(width_));
-  // 2 * width * height
-  depth_mat_.resize(source_count_, std::vector<std::vector<float>(width_)>.resize(height_));
+  depth_mat_.resize(source_count_);
+  for (auto &i: depth_mat_) {
+    i.resize(height_, std::vector<float>(width_));
+  }
 
   return true;
 }
@@ -56,9 +57,9 @@ void Lidar::Update(pcl::PointCloud<pcl::PointXYZ> REF_IN point_cloud) {
       }
     }
 
-    if (buffer_[i].Full()) {
+    if (buffer_[source].Full()) {
       Eigen::Matrix<int, 2, kPointCloudNum> out_points;
-      buffer_.Pop(out_points);
+      buffer_[source].Pop(out_points);
       for (size_t i = 0; i < kPointCloudNum; i ++) {
         int x = out_points(1, i), y = out_points(0, i);
         depth_mat_[source][x][y] = 0;

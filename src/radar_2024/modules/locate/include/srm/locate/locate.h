@@ -10,16 +10,16 @@ namespace srm::locate {
 /// 机器人主控公共接口类
 class Locate {
  public:
-  Lidar() = default;
-  ~Lidar() = default;
+  Locate() = default;
+  ~Locate() = default;
 
   bool Initialize(std::vector<cv::Mat> REF_IN intrinsic_mat, std::vector<cv::Mat> REF_IN distortion_mat);
 
-  void Run(std::vector<Armor> REF_IN armor_list, std::vector<LocateInfo> location);
+  void Run(std::vector<srm::nn::Armor> REF_IN armor_list, std::vector<srm::nn::LocateInfo> REF_OUT locate_list);
 
  protected:
-  std::vector<Eigen::Matrix4f> homogeneous_mat_ ///< 齐次变换矩阵(camera2world)
-  std::vector<Eigen::Matrix4f> homogeneous_mat_t_ ///< 逆矩阵
+  std::vector<Eigen::Matrix4f> homogeneous_mat_; ///< 齐次变换矩阵(camera2world)
+  std::vector<Eigen::Matrix4f> homogeneous_mat_t_; ///< 逆矩阵
 
   std::vector<cv::Mat> intrinsic_mat_;
   std::vector<cv::Mat> distortion_mat_;

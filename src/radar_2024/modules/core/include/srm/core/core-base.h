@@ -11,6 +11,7 @@
 #include "srm/viewer.hpp"
 #include "srm/nn.hpp"
 #include "srm/lidar.hpp"
+#include "srm/locate.hpp"
 
 /// 抓取并处理来自操作系统的控制信号
 void SignalHandler(int);

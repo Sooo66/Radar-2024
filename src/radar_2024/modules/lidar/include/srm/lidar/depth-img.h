@@ -22,25 +22,18 @@ class Lidar {
   Lidar() = default;
   ~Lidar() = default;
 
-  bool Initialize(cv::Size REF_IN img_size, std::vector<cv::Mat REF_IN> intrinsic_mat, std::vector<cv::Mat> REF_IN homogeneous_mat);
+  bool Initialize(cv::Size REF_IN img_size, std::vector<cv::Mat> REF_IN intrinsic_mat, std::vector<cv::Mat> REF_IN homogeneous_mat);
 
   void Update(pcl::PointCloud<pcl::PointXYZ> REF_IN point_cloud);
 
-  /**
-   * @brief 取点云矩形框
-   * @param x 左上角 
-   * @param y 右下角
-   * @param depth 框内深度均值
-   * @return 是否成功得到深度
-   */
-  float GetDepth(cv::Point2f REF_IN x, cv::Point2f REF_IN y);
+  float GetDepth(int source, cv::Point2f REF_IN x, cv::Point2f REF_IN y);
 
-  cv::Mat Show();
+  std::vector<cv::Mat> Show();
 
  protected:
   int source_count_;
 
-  std::vector<Buffer<Eigen::Matrix<int, 2, kPointCloudNum>, kBufferSize>> buffer_;  ///< 点云队列
+  std::array<Buffer<Eigen::Matrix<int, 2, kPointCloudNum>, kBufferSize>, 2> buffer_;  ///< 点云队列
 
   std::vector<cv::Mat> intrinsic_mat_;                ///< 相机内参矩阵
   std::vector<cv::Mat> homogeneous_mat_;              ///< 雷达到相机的外参变换矩阵

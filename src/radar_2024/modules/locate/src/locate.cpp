@@ -1,7 +1,9 @@
-#include "srm/lidar.hpp"
-
+#include "srm/locate.hpp"
+#include <opencv2/core/eigen.hpp>
+#include <opencv2/calib3d.hpp>
+#include <iostream>
 #include <memory>
-namespace srm::lidar {
+namespace srm::locate {
 
 bool Locate::Initialize(std::vector<cv::Mat> REF_IN intrinsic_mat, std::vector<cv::Mat> REF_IN distortion_mat) {
   int source_count = intrinsic_mat.size();
@@ -9,13 +11,14 @@ bool Locate::Initialize(std::vector<cv::Mat> REF_IN intrinsic_mat, std::vector<c
   homogeneous_mat_t_.resize(source_count);
   intrinsic_mat_.resize(source_count);
   distortion_mat_.resize(source_count);
+  camera_position_.resize(source_count);
 
   for (int i = 0; i < source_count; i ++) {
-    intrinsic_mat_ = intrinsic_mat[i];
-    distortion_mat_ = distortion_mat[i];
-    std::prefix = "locate.camera";
+    intrinsic_mat_[i] = intrinsic_mat[i];
+    distortion_mat_[i] = distortion_mat[i];
+    std::string prefix = "locate.camera";
     prefix += std::to_string(i);
-    cv::Mat T = cfg.Get<cv::Mat>({prefix});
+    cv::Mat T = cfg.Get<cv::Mat>({prefix, "homogeneous_mat"});
     cv::cv2eigen(T, homogeneous_mat_[i]);
     std::cout << homogeneous_mat_[i] << "\n";
     homogeneous_mat_t_[i] = homogeneous_mat_[i].inverse();
@@ -28,21 +31,28 @@ bool Locate::Initialize(std::vector<cv::Mat> REF_IN intrinsic_mat, std::vector<c
   return true;
 }
 
-void Locate::Run(std::vector<srm::nn::Armor> REF_IN armor_list, std::vector<LocateInfo> REF_OUT locate_list) {
+void Locate::Run(std::vector<srm::nn::Armor> REF_IN armor_list, std::vector<srm::nn::LocateInfo> REF_OUT locate_list) {
   for (auto &armor: armor_list) {
     if (armor.depth != -1) {
       Eigen::Matrix<float, 4, 1> xyz1;
       int source = armor.source;
       auto depth = armor.depth;
       cv::Point2f center = armor.pts[0] + armor.pts[1];
-      auto height = armor.pts[0].x - armor.pts[1].x;
-      auto width = armor.pts[0].y - armor.pts[1].y;
-      cv::undistortPoints(center, center, intrinsic_mat_[source], distortion_mat_[source]);
-      xyz1 << center.x * depth , center.y * depth, depth, 1.;
+      
+      cv::Mat center_mat(1, 1, CV_32FC2);
+      center_mat.at<cv::Vec2f>(0, 0) = cv::Vec2f(center.x, center.y);
+      
+      cv::undistortPoints(center_mat, center_mat, intrinsic_mat_[source], distortion_mat_[source]);
+      cv::Vec2f center_vec = center_mat.at<cv::Vec2f>(0, 0);
+
+      xyz1 << center_vec[0] * depth , center_vec[1] * depth, depth, 1.;
 
       Eigen::Matrix<float, 4, 1> location;
       location = homogeneous_mat_t_[source] * xyz1;
       locate_list.push_back({
+        armor.roi,
+        armor.pts,
+        armor.depth,
         armor.id,
         armor.color,
         location[0],
@@ -53,4 +63,4 @@ void Locate::Run(std::vector<srm::nn::Armor> REF_IN armor_list, std::vector<Loca
   }
 }
 
-}  // namespace srm::lidar
+}  // namespace srm::locate
